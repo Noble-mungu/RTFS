@@ -1,8 +1,8 @@
 # Define the PostgreSQL connection properties
 postgres_url = "jdbc:postgresql://localhost:5432/your_database"
 properties = {
-    "user": "your_user0",
-    "password": "your_password",
+    "user": "postgres",
+    "password": "azbycx567",
     "driver": "org.postgresql.Driver"
 }
 
