@@ -112,5 +112,5 @@ For customer information, the endpoint is: /api/customer/<cc_num> which would re
 For creating a transaction statement for the specific customer, the endpoint is: api/statement/<cc_num> which would return all the transaction records for the credit card <cc_num> and order them by transaction time.
 
 
-## Implementation using Java/Scala and Apache Maven
+## Implementation in Java/Scala and Apache Maven
 https://github.com/Noble-mungu/RTFS-A
