@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.feature.OneHotEncoderModel","timestamp":1716354467915,"sparkVersion":"3.5.1","uid":"OneHotEncoder_1af223441353","paramMap":{"inputCol":"merchant_indexed","outputCol":"merchant_encoded"},"defaultParamMap":{"handleInvalid":"error","outputCol":"OneHotEncoder_1af223441353__output","dropLast":true}}
