@@ -13,7 +13,7 @@
 
 Data Import
 
--Use a Spark SQL job to retrieve data from CSV files and import them into a Mongo/Cassandra database.
+-Use a Spark SQL job to retrieve data from CSV files and import them into a Mongo database.
 
 ## Model Training
 
