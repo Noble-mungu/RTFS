@@ -17,7 +17,7 @@ Data Import
 
 ## Model Training
 
-## Run a Spark ML job to read data from Mongo/Cassandra
+## Run a Spark ML job to read data from Mongo
 -Train models (Preprocessing and Random Forest) to classify transactions as fraud or non-fraud.
 -Save the trained models to the file system.
 Real-Time Processing
