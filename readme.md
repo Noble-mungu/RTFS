@@ -27,7 +27,7 @@ Real-Time Processing
 -Consume credit card transactions from Kafka.</br>
 -Create a Kafka topic and produce transaction records from transaction_testing.csv.</br>
 -Predict transaction fraud status.</br>
--Save transactions into fraud_transaction and non_fraud_transaction tables in Mongo/Cassandra based on classification.</br>
+-Save transactions into fraud_transaction and non_fraud_transaction tables in Mongo based on classification.</br>
 -Display Results</br>
 -Use Spring Boot to create a dashboard displaying fraud and non-fraud transactions in real-time.</br>
 
