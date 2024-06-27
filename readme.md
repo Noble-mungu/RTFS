@@ -70,33 +70,33 @@ Also generate over 10K transaction records for these customers using the same wa
 
 ## Kafka producer
 Create a Kafka topic named as creditcardTransaction with 3 partitions.
-
+```
 kafka-topics --zookeeper localhost:2181 --create --topic 
-
+```
 creditcardTransaction  --replication-factor 1 --partitions 3
 The Kafka producer job would randomly select transactions from the transaction training dataset as messages and save the current timestamp into the messages as the transaction time. Later, these messages would be fed into the Spark Streaming job.
 ## Spark ML job
 ## Data Preprocessing and Storage
 
-Spark SQL retrieves customer and transaction data.</br>
-Data is imported into Cassandra database.</br>
-During import, calculates additional features:</br>
-Age (based on customer's date of birth)</br>
-Distance (Euclidean distance between customer and merchant)</br>
-Training data is split and stored in separate tables:</br>
-Fraud transactions</br>
-Non-fraud transactions</br>
+* Spark SQL retrieves customer and transaction data.</br>
+* Data is imported into Cassandra database.</br>
+* During import, calculates additional features:</br>
+* Age (based on customer's date of birth)</br>
+* Distance (Euclidean distance between customer and merchant)</br>
+* Training data is split and stored in separate tables:</br>
+* Fraud transactions</br>
+* Non-fraud transactions</br>
 
 ## Model Training
 
--Spark ML loads data from fraud and non-fraud tables.</br>
--Data undergoes transformations:</br>
--StringIndexer - Converts categorical data to numerical values.</br>
--OneHotEncoder - Normalizes numerical data.</br>
--VectorAssembler - Combines all features into a single vector.</br>
--Data balancing: Reduces non-fraud transactions (K-means) to address imbalance.</br>
--Balanced data is used to train a Random Forest classification model.</br>
--Trained model is saved to the filesystem.</br>
+* Spark ML loads data from fraud and non-fraud tables.</br>
+* Data undergoes transformations:</br>
+* StringIndexer - Converts categorical data to numerical values.</br>
+* OneHotEncoder - Normalizes numerical data.</br>
+* VectorAssembler - Combines all features into a single vector.</br>
+* Data balancing: Reduces non-fraud transactions (K-means) to address imbalance.</br>
+* Balanced data is used to train a Random Forest classification model.</br>
+* Trained model is saved to the filesystem.</br>
 
 
 
@@ -118,5 +118,3 @@ Create an index for global blacklist data.
 -Index customer or transaction data that are marked as blacklisted.
 
 
-## Implementation in Java/Scala and Apache Maven
-https://github.com/Noble-mungu/RTFS-A
