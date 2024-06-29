@@ -31,6 +31,11 @@ Real-Time Processing
 * Display Results</br>
 * Use Spring Boot to create a dashboard displaying fraud and non-fraud transactions in real-time.</br>
 
+![Non-fraud dashboard](https://github.com/Noble-mungu/RTFS/assets/64100418/2749e35d-2ee4-4c33-9521-8d11950820d8)
+![Transactions](https://github.com/Noble-mungu/RTFS/assets/64100418/83443d65-3a9b-42e1-aacc-4667d6ffd8c0)
+![Fraud dashboard](https://github.com/Noble-mungu/RTFS/assets/64100418/218dcfc3-2fd4-491d-bb37-5aede927a9c4)
+
+
 ## Flask to create REST APIs to:
 Retrieve customer information.</br>
 Create transaction statements for each customer.</br>
