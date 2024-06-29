@@ -34,7 +34,7 @@ rf_model = PipelineModel.load("rf_model")
 prediction_df = preprocessing_model.transform(transaction_df) \
     .transform(rf_model)
 
-# Save results to Cassandra
+# Save results to Mongodb
 fraud_df = prediction_df.filter(prediction_df.prediction == 1) \
     .select("cc_num", "amount", "timestamp", "prediction") \
     .write.format("org.apache.spark.sql.cassandra") \
