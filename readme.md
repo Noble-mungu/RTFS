@@ -123,3 +123,8 @@ Create an index for global blacklist data.
 -Index customer or transaction data that are marked as blacklisted.
 
 
+
+
+https://github.com/user-attachments/assets/da9bec59-8f5d-414a-b0cf-c4231db167b8
+
+
