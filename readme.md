@@ -1,130 +1,66 @@
-## REAL-TIME FRAUD ANALYTICS SYSTEM
+# Real-Time Fraud Detection
 
-## WORKFLOW AND ARCHITECTURE
-
-
-![Screenshot 2024-05-22 190000](https://github.com/Noble-mungu/RTFS/assets/64100418/4a7d9277-d6c9-4e64-9762-053005911d20)
+## Project Summary:
+This project built a real-time credit card fraud detection system with [**Flink**],[**Kafka**] and [**PostgreSQL**]. A feedback loop is incorporated in the system to receive the answers of customers. The throughput can be as high as 3000 transactions/s and latency can be as short as 10 ms. A logistic classifier is implemented in Flink to decide whether a transaction is a fraud or not.
 
 
-## Simulate Data
+## Introduction:
 
-* Generate 100 customers' information and save it to customer.csv.
-* Generate over 10,000 transaction records and save them to transaction_training.csv.
+### Background:
+Every day, everyone uses credit cards in restanrants, markets and on the Internet. The point of sale sends back the transaction information to the bank to decide whether the transaction is a fraud or not. If it is not a fraud, the transaction is accepted, otherwise the transaction is rejected. My project is designed to build a real-time fraud detection system.
 
-Data Import
+### DataSet
+The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
 
-* Use a Spark SQL job to retrieve data from CSV files and import them into a Mongo database.
+It contains only numerical input variables which are the result of a PCA transformation. Unfortunately, due to confidentiality issues, we cannot provide the original features and more background information about the data. Features V1, V2, ... V28 are the principal components obtained with PCA, the only features which have not been transformed with PCA are 'Time' and 'Amount'. Feature 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning. Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
 
-## Model Training
+## Data Pipeline:
+This detection system has two branches including a streaming processing and a feedback loop.
+### Architecture
+![alt text](image.png)
+### Streaming Processing in Flink
+1. Kafka producers generate input streaming of transactions and sends the data to the topic transactions-foward in Kafka.
+2. Kafka ingests streaming input data and sends to Flink for processing.
+3. The logistic classifier implemented in Flink decides whether the transaction is a Fraud or not.
+4. If the prediction of logistic classifier is non-fraud, the transaction is accepted and the data is saved in PostgreSQL.
+5. If the prediction is fraud, the transaction is sent to the other topic transactions-backward in Kafka.
+### Feedback Loop
+1. If the prediction is fraud, the transaction is sent to the other topic transactions-backward in Kafka and then sent to customer simulator.
+2. Customer simulator sends a SMS to the customer to ask whether he/she made the transaction. If the answer is "Yes, it is me", the transaction is accepted. If the answer is "No, it is not me", the transaction is rejected.
+3. If the simulator doen't receive the reply in time, the transaction is pushed to Dash where a banker processes the transaction manually. The banker gives the customer a phone call and decides to accept or reject based on the answer. If nobody listens, the transaction is rejected and marked as "no reply".
 
-## Run a Spark ML job to read data from Mongo
-* Train models (Preprocessing and Random Forest) to classify transactions as fraud or non-fraud.
-* Save the trained models to the file system.
-Real-Time Processing
+### UI provides real-time monitor on the results and manual processing capacity of bankers. 
+1. "start", "second", "third", and "stop" button: start the input streaming, turn on the second Kafka producer, turn on the third Kafka producer, stop the whole pipeline.
+2. "call" button: a banker can give a call to the current phone number poped in Dash.
+3. "Yes: Accept", "No: Reject", and "No answer: Reject" button: accept the transaction since the answer is "yes, I made the transaction", reject the transaction since the answer is "no, I didn't make the transaction", reject the transaction since nobody listens the call.
+4. Left window: the transaction throughput (number of transactions per second) as a function of elapsed time.
+5. Right window: the latency as a function of elapsed time.
+6. "#True Pos." and "#False Pos." button: report how many transactions are predicted to be frauds correctly, report how many transactions are predicted to be frauds incorrectly.
 
-## Start a Spark Streaming job to:
-* Load ML models.</br>
-* Consume credit card transactions from Kafka.</br>
-* Create a Kafka topic and produce transaction records from transaction_testing.csv.</br>
-* Predict transaction fraud status.</br>
-* Save transactions into fraud_transaction and non_fraud_transaction tables in Mongo based on classification.</br>
-* Display Results</br>
-* Use Spring Boot to create a dashboard displaying fraud and non-fraud transactions in real-time.</br>
+## Result
+### Throughput and latency
+When the throughput is below 2000 transactions per second, the latency time is below 10 ms. When the throughput inceases to 3000 transactions per second, there are more spikes and the average latency time thus increases.
 
-![Non-fraud dashboard](https://github.com/Noble-mungu/RTFS/assets/64100418/2749e35d-2ee4-4c33-9521-8d11950820d8)
-![Transactions](https://github.com/Noble-mungu/RTFS/assets/64100418/83443d65-3a9b-42e1-aacc-4667d6ffd8c0)
-![Fraud dashboard](https://github.com/Noble-mungu/RTFS/assets/64100418/218dcfc3-2fd4-491d-bb37-5aede927a9c4)
+### Accuracy
+The overall accuracy of the logistic regression is 99.93% in the test dataset, higher than the ratio of non-fraud data 99.828%.
+Both the percision and recall of non-fraud class are 1.00 in the test dataset. The percision and recall of fraud class are 0.79 and 0.78 respectively in the test dataset.
 
+## Data Engineering Challenge
 
-## Flask to create REST APIs to:
-Retrieve customer information.</br>
-Create transaction statements for each customer.</br>
+1. How to find the bottleneck of my pipeline and resolve it:<br/>
+I did stress test to my pipeline to find the bottleneck by increasing the input streaming gradually. After doubling the input streaming to 2000 transactions/s, since Flink could only process around 1700 transactions per second thus there were more and more data waiting in kafka and the waiting time (latency) becomed longer and longer. Thus Flink was the bottleneck! I then increased the parallelism of Flink to increase the processing capacity. Finally the pipeline can handle 3000 transactions per socond thus the bottleneck problem is resolved!
 
-## Implementation Details
-## Customers & Transactions dataset
-Stimulate 100 customers using [Mockaroo](https://www.mockaroo.com/). For each record, it includes following columns (information):</br>
-
-* cc_num: credit card number which uniquely identify each card / customer</br>
-* first: customer's first name</br>
-* last: customer's last name</br>
-* gender: customer's gender</br>
-* street</br>
-* city</br>
-* state</br>
-* zip: zip code for the address above</br>
-* lat: latitude for the address above</br>
-* long: longitude for the address above</br>
-* job: customer's vocation</br>
-* dob: the date of birth for the customer</br>
-Also generate over 10K transaction records for these customers using the same way. For each record, it includes following columns (information):</br>
-
-* cc_num: credit card number which uniquely identify each card / customer</br>
-* first: customer's first name</br>
-* ast: customer's last name</br>
-* trans_num: transaction number</br>
-* trans_date: transaction date</br>
-* trans_time: transaction time</br>
-* unix_time: transaction time in unix timestamp format</br>
-* category: category for the purchased item</br>
-* amt: transaction amount</br>
-* merchant: the place that the transaction happened</br>
-* merch_lat: latitude for the merchant</br>
-* merch_long: longitude for the merchant</br>
-* is_fraud: boolean to indicate the transaction is fraud or not</br>
-
-
-## Kafka producer
-Create a Kafka topic named as creditcardTransaction with 3 partitions.
-```
-kafka-topics --zookeeper localhost:2181 --create --topic 
-```
-creditcardTransaction  --replication-factor 1 --partitions 3
-The Kafka producer job would randomly select transactions from the transaction training dataset as messages and save the current timestamp into the messages as the transaction time. Later, these messages would be fed into the Spark Streaming job.
-## Spark ML job
-## Data Preprocessing and Storage
-
-* Spark SQL retrieves customer and transaction data.</br>
-* Data is imported into Mongodb database.</br>
-* During import, calculates additional features:</br>
-* Age (based on customer's date of birth)</br>
-* Distance (Euclidean distance between customer and merchant)</br>
-* Training data is split and stored in separate tables:</br>
-* Fraud transactions</br>
-* Non-fraud transactions</br>
-
-## Model Training
-
-* Spark ML loads data from fraud and non-fraud tables.</br>
-* Data undergoes transformations:</br>
-* StringIndexer - Converts categorical data to numerical values.</br>
-* OneHotEncoder - Normalizes numerical data.</br>
-* VectorAssembler - Combines all features into a single vector.</br>
-* Data balancing: Reduces non-fraud transactions (K-means) to address imbalance.</br>
-* Balanced data is used to train a Random Forest classification model.</br>
-* Trained model is saved to the filesystem.</br>
+2. How to Build and train machine learning model in Flink:<br/>
+The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
 
 
 
 
-
-## Front-end dashboard
-The front-end dashboard class will be designed with Spring Bot framework that would select fraud and non-fraud transactions from Mongodb tables and display it on the dashboard in real-time. This method will call a select query to retrieve the latest fraud and non-fraud transactions that occurred in the last 5 seconds and display it on the dashboard. To display the record only once, the method maintains the max timestamp of previously displayed fraud/non-fraud transactions. And in the current trigger, it would only select those transactions whose timestamp is greater than the previous max timestamp.
-
-## REST API for customers and transaction statements
-I also design two REST APIs with the Flask framework to easily retrieve the customer information and create transaction statements for customers. They are all implemented by calling SQL queries to select records from the Mongodb non-fraud table.
-
-For customer information, the endpoint is: /api/customer/<cc_num> which would return basic information for the credit card <cc_num> owner.
-For creating a transaction statement for the specific customer, the endpoint is: api/statement/<cc_num> which would return all the transaction records for the credit card <cc_num> and order them by transaction time.
-
-
-## Elasticsearch.
-Create an index for global blacklist data.
--Index Blacklist Data
--Index customer or transaction data that are marked as blacklisted.
-
-
-
-
-https://github.com/user-attachments/assets/da9bec59-8f5d-414a-b0cf-c4231db167b8
+## Tech Stack:
+1. Kafka
+2. Flink
+3. PostgreSQL
+4. Dash
+5. Zookerper
 
 

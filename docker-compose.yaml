@@ -1,0 +1,343 @@
+version: '3.9'
+
+services:
+
+  zookeeper-1:
+    image: elevy/zookeeper:v3.4.10
+    environment:
+      MYID: 1
+      SERVERS: zookeeper-1,zookeeper-2,zookeeper-3
+      SERVER_JVMFLAGS: -Xmx128M -Xms128M -server -XX:+UseG1GC
+    networks:
+      - kafka_network
+      - flink_network
+  zookeeper-2:
+    image: elevy/zookeeper:v3.4.10
+    environment:
+      MYID: 2
+      SERVERS: zookeeper-1,zookeeper-2,zookeeper-3
+      SERVER_JVMFLAGS: -Xmx128M -Xms128M -server -XX:+UseG1GC
+    networks:
+      - kafka_network
+      - flink_network
+
+  zookeeper-3:
+    image: elevy/zookeeper:v3.4.10
+    environment:
+      MYID: 3
+      SERVERS: zookeeper-1,zookeeper-2,zookeeper-3
+      SERVER_JVMFLAGS: -Xmx128M -Xms128M -server -XX:+UseG1GC
+    networks:
+      - kafka_network
+      - flink_network
+
+  kafka-1:
+    image: elevy/kafka:v0.11.0.1
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    ports:
+      - '9092:9092'
+    environment:
+      ADVERTISED_HOST_NAME: kafka-1
+      ZOOKEEPER_SERVERS: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      ZOOKEEPER_ROOT: /kafka
+      KAFKA_HEAP_OPTS: -Xmx256M -Xms256M
+    volumes:
+      - ./shared/kafka:/shared
+    networks:
+      - kafka_network
+
+  kafka-2:
+    image: elevy/kafka:v0.11.0.1
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+      ADVERTISED_HOST_NAME: kafka-2
+      ZOOKEEPER_SERVERS: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      ZOOKEEPER_ROOT: /kafka
+      KAFKA_HEAP_OPTS: -Xmx256M -Xms256M
+    volumes:
+      - ./shared/kafka:/shared
+    networks:
+      - kafka_network
+
+  kafka-3:
+    image: elevy/kafka:v0.11.0.1
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+      ADVERTISED_HOST_NAME: kafka-3
+      ZOOKEEPER_SERVERS: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      ZOOKEEPER_ROOT: /kafka
+      KAFKA_HEAP_OPTS: -Xmx256M -Xms256M
+    volumes:
+      - ./shared/kafka:/shared
+    networks:
+      - kafka_network
+
+  jobmanager-1:
+    image: elevy/flink_jobmanager:v1.4.0
+    hostname: jobmanager-1
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+      - postgreshost
+    ports:
+      - '127.0.0.1:8081:8081'
+    environment:
+      FLINK_ENV_JAVA_OPTS: -server -XX:+UseG1GC
+      FLINK_JOBMANAGER_HEAP_MB: 128
+      FLINK_HA: zookeeper
+      FLINK_HA_CLUSTERID: cluster-1
+      FLINK_HA_STORAGEDIR: file:///shared/ha
+      FLINK_HA_ZOOKEEPER_QUORUM: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      FLINK_HA_ZOOKEEPER_PATH_ROOT: /flink/cluster-1
+      FLINK_STATE_CHECKPOINTS_DIR: file:///shared/checkpoints/external
+    volumes:
+      - ./shared/flink:/shared
+    networks:
+      - flink_network
+      - postgres_network
+      - kafka_network
+
+  jobmanager-2:
+    image: elevy/flink_jobmanager:v1.4.0
+    hostname: jobmanager-2
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+      - postgreshost
+    ports:
+      - '127.0.0.1:8082:8081'
+    environment:
+      FLINK_ENV_JAVA_OPTS: -server -XX:+UseG1GC
+      FLINK_JOBMANAGER_HEAP_MB: 128
+      FLINK_HA: zookeeper
+      FLINK_HA_CLUSTERID: cluster-1
+      FLINK_HA_STORAGEDIR: file:///shared/ha
+      FLINK_HA_ZOOKEEPER_QUORUM: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      FLINK_HA_ZOOKEEPER_PATH_ROOT: /flink/cluster-1
+      FLINK_STATE_CHECKPOINTS_DIR: file:///shared/checkpoints/external
+    volumes:
+      - ./shared/flink:/shared
+    networks:
+      - flink_network
+      - postgres_network
+      - kafka_network
+
+  taskmanager-1:
+    image: elevy/flink_taskmanager:v1.4.0
+    hostname: taskmanager-1
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+      - jobmanager-1
+      - jobmanager-2
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - postgreshost
+    environment:
+      FLINK_ENV_JAVA_OPTS: -server -XX:+UseG1GC
+      FLINK_TASKMANAGER_HEAP_MB: 512
+      FLINK_TASKMANAGER_NUMBEROFTASKSLOTS: 4
+      FLINK_HA: zookeeper
+      FLINK_HA_CLUSTERID: cluster-1
+      FLINK_HA_STORAGEDIR: file:///shared/ha
+      FLINK_HA_ZOOKEEPER_QUORUM: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      FLINK_HA_ZOOKEEPER_PATH_ROOT: /flink/cluster-1
+      FLINK_STATE_CHECKPOINTS_DIR: file:///shared/checkpoints/external
+    volumes:
+      - ./shared/flink:/shared
+    networks:
+      - flink_network
+      - postgres_network
+      - kafka_network
+
+  taskmanager-2:
+    image: elevy/flink_taskmanager:v1.4.0
+    hostname: taskmanager-2
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+      - jobmanager-1
+      - jobmanager-2
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - postgreshost
+    environment:
+      FLINK_ENV_JAVA_OPTS: -server -XX:+UseG1GC
+      FLINK_TASKMANAGER_HEAP_MB: 512
+      FLINK_TASKMANAGER_NUMBEROFTASKSLOTS: 4
+      FLINK_HA: zookeeper
+      FLINK_HA_CLUSTERID: cluster-1
+      FLINK_HA_STORAGEDIR: file:///shared/ha
+      FLINK_HA_ZOOKEEPER_QUORUM: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      FLINK_HA_ZOOKEEPER_PATH_ROOT: /flink/cluster-1
+      FLINK_STATE_CHECKPOINTS_DIR: file:///shared/checkpoints/external
+    volumes:
+      - ./shared/flink:/shared
+    networks:
+      - flink_network
+      - postgres_network
+      - kafka_network
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKER_CONNECT: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    networks:
+      - kafka_network
+
+  kafka_producer:
+    build: ./kafka_producers
+    container_name: kafka_producer
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - postgreshost
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      TOPIC_NAME: "transactions-forward"
+    volumes:
+      - ./kafka_producers:/app
+      - ./kafka_producers/balanced_data.csv:/app/balanced_data.csv
+    networks:
+      - kafka_network
+
+  customer_simulator:
+    build: ./customer_simulator
+    container_name: customer_simulator
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - postgreshost
+    networks:
+      - kafka_network
+      - postgres_network
+
+  dash:
+    build: ./dash
+    container_name: dash
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - postgreshost
+    ports:
+      - "8050:8050"
+    environment:
+      DB_HOST: postgreshost  # Use the updated hostname for PostgreSQL
+      DB_PORT: 5433          # Use the correct port
+      DB_NAME: frauddetection
+      DB_USER: postgres
+      DB_PASSWORD: azbycx567
+    networks:
+      - kafka_network
+      - postgres_network
+
+  # Database Services
+  postgreshost:
+    image: postgres:15.7
+    container_name: postgreshost
+    hostname: postgreshost
+    ports:
+      - "5433:5433"  # Expose the PostgreSQL port
+    environment:
+      POSTGRES_DB: frauddetection
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: azbycx567
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - postgres_network
+
+  metabase:
+    image: metabase/metabase:v0.49.21
+    container_name: metabase
+    hostname: metabase
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    expose:
+      - 3000
+    environment:
+      MB_DB_TYPE: postgres
+      POSTGRES_DB: frauddetection
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: azbycx567
+      MB_DB_PORT: 5433
+      MB_DB_HOST: postgreshost  # Use the updated hostname for PostgreSQL
+      MB_ENCRYPTION_SECRET_KEY: my_secret_key  # Replace with your encryption key
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.metabasereports.rule=Host(`metabase.example.com`)"  # Replace with your actual host
+      - "traefik.http.routers.metabasereports.entrypoints=websecure"
+      - "traefik.http.routers.metabasereports.tls.certresolver=myresolver"
+    depends_on:
+      - postgreshost
+    restart: always
+    networks:
+      - postgres_network
+
+  traefik:
+    image: traefik:v3.1.0
+    container_name: traefik
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${LE_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    restart: always
+    networks:
+      - traefik_network
+
+networks:
+  kafka_network:
+    driver: bridge
+  flink_network:
+    driver: bridge
+  postgres_network:
+    driver: bridge
+  traefik_network:
+    driver: bridge
+
+secrets:
+  db_password:
+    file: db_password.txt
+  db_user:
+    file: db_user.txt
+  mb_key:
+    file: mb_key.txt
