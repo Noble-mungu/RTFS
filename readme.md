@@ -56,11 +56,11 @@ The datasets contains transactions made by credit cards in September 2013 by eur
 
 <video controls src="RTFS-demo.mp4" title="DEMO"></video>
 
+
 ## Tech Stack:
 1. Kafka
 2. Flink
 3. PostgreSQL
 4. Dash
 5. Zookerper
-
 
