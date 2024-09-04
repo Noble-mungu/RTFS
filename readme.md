@@ -45,7 +45,7 @@ When the throughput is below 2000 transactions per second, the latency time is b
 The overall accuracy of the logistic regression is 99.93% in the test dataset, higher than the ratio of non-fraud data 99.828%.
 Both the percision and recall of non-fraud class are 1.00 in the test dataset. The percision and recall of fraud class are 0.79 and 0.78 respectively in the test dataset.
 
-## Data Engineering Challenge
+## Stress testing
 
 1. How to find the bottleneck of my pipeline and resolve it:<br/>
 I did stress test to my pipeline to find the bottleneck by increasing the input streaming gradually. After doubling the input streaming to 2000 transactions/s, since Flink could only process around 1700 transactions per second thus there were more and more data waiting in kafka and the waiting time (latency) becomed longer and longer. Thus Flink was the bottleneck! I then increased the parallelism of Flink to increase the processing capacity. Finally the pipeline can handle 3000 transactions per socond thus the bottleneck problem is resolved!
@@ -53,7 +53,7 @@ I did stress test to my pipeline to find the bottleneck by increasing the input 
 2. How to Build and train machine learning model in Flink:<br/>
 The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
 
-<video controls src="RTFS-demo.mp4" title="DEMO"></video>
+<video controls src="RTFS-demo.mp4" title="DEMO">DEMO</video>
 
 
 
