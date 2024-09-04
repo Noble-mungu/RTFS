@@ -1,6 +1,6 @@
-
+<<<<<<< HEAD
 .env
-
+=======
 venv/
 .env
 flink/
@@ -13,3 +13,6 @@ postgres
 letsencrypt
 init.sql
 db.user.txt
+>>>>>>> 11d18bd (Add documentation)
+balanced_data.csv
+creditcard.csv
