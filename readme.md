@@ -17,8 +17,11 @@ It contains only numerical input variables which are the result of a PCA transfo
 ## Data Pipeline:
 This detection system has two branches including a streaming processing and a feedback loop.
 ### Architecture
-![alt text](image.png)
+
+![Screenshot 2024-09-05 123026](https://github.com/user-attachments/assets/b6ade52a-a669-48a3-bcac-f6a983cfcb74)
+
 ### Streaming Processing in Flink
+
 1. Kafka producers generate input streaming of transactions and sends the data to the topic transactions-foward in Kafka.
 2. Kafka ingests streaming input data and sends to Flink for processing.
 3. The logistic classifier implemented in Flink decides whether the transaction is a Fraud or not.
