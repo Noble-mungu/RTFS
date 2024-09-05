@@ -64,10 +64,5 @@ https://github.com/user-attachments/assets/52205aba-4ff3-4ad1-a513-7848b782f72b
 
 
 
-## Tech Stack:
-1. Kafka
-2. Flink
-3. PostgreSQL
-4. Dash
-5. Zookerper
+
 
