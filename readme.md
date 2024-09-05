@@ -54,6 +54,10 @@ I did stress test to my pipeline to find the bottleneck by increasing the input 
 The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
 
 
+https://github.com/user-attachments/assets/52205aba-4ff3-4ad1-a513-7848b782f72b
+
+
+
 ## Tech Stack:
 1. Kafka
 2. Flink
