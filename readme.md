@@ -1,7 +1,7 @@
 # RTFS-Real-Time Fraud Detection
 
 ## Project Summary
-This project built a real-time credit card fraud detection system with [**Flink**],[**Kafka**] and [**PostgreSQL**]. A feedback loop is incorporated in the system to receive the answers of customers. The throughput can be as high as 3000 transactions/s and latency can be as short as 10 ms. A logistic classifier is implemented in Flink to decide whether a transaction is a fraud or not.
+This project is a real-time  fraud detection system that leverages Flink,Kafka and PostgreSQL. A feedback loop is incorporated in the system to receive the answers of customers. The throughput can be as high as 3000 transactions/s and latency can be as short as 10 ms. A logistic classifier is implemented in Flink to decide whether a transaction is a fraud or not.
 
 
 ## Introduction
