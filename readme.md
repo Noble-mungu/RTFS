@@ -10,7 +10,7 @@ This project is a real-time  fraud detection system that leverages Flink,Kafka a
 Every day, everyone uses credit cards in restanrants, markets and on the Internet. The point of sale sends back the transaction information to the bank to decide whether the transaction is a fraud or not. If it is not a fraud, the transaction is accepted, otherwise the transaction is rejected. My project is designed to build a real-time fraud detection system.
 
 ### DataSet
-The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
+The [Dataset](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
 
 It contains only numerical input variables which are the result of a PCA transformation. Unfortunately, due to confidentiality issues, I couldn't get the original features and more background information about the data. Features V1, V2, ... V28 are the principal components obtained with PCA, the only features which have not been transformed with PCA are 'Time' and 'Amount'. Feature 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning. Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
 
@@ -56,8 +56,6 @@ Both the percision and recall of non-fraud class are 1.00 in the test dataset. T
 1. How to find the bottleneck of my pipeline and resolve it:<br/>
 I did stress test to my pipeline to find the bottleneck by increasing the input streaming gradually. After doubling the input streaming to 2000 transactions/s, since Flink could only process around 1700 transactions per second thus there were more and more data waiting in kafka and the waiting time (latency) becomed longer and longer. Thus Flink was the bottleneck! I then increased the parallelism of Flink to increase the processing capacity. Finally the pipeline can handle 3000 transactions per socond thus the bottleneck problem is resolved!
 
-2. How to Build and train machine learning model in Flink:<br/>
-The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
 
 
 https://github.com/user-attachments/assets/52205aba-4ff3-4ad1-a513-7848b782f72b
