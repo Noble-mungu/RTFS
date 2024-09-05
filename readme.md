@@ -40,6 +40,9 @@ This detection system has two branches including a streaming processing and a fe
 5. Right window: the latency as a function of elapsed time.
 6. "#True Pos." and "#False Pos." button: report how many transactions are predicted to be frauds correctly, report how many transactions are predicted to be frauds incorrectly.
 
+
+![image](https://github.com/user-attachments/assets/468e0c11-eda7-484c-af3f-0aa6797cfea1)
+
 ## Result
 ### Throughput and latency
 When the throughput is below 2000 transactions per second, the latency time is below 10 ms. When the throughput inceases to 3000 transactions per second, there are more spikes and the average latency time thus increases.
